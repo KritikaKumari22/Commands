@@ -1,0 +1,13 @@
+sudo apt update
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb
+uname -m
+cd ~/Downloads
+chmod +x Anaconda*.sh
+ls
+./Anaconda*.sh
+source ~/.bashrc
+conda init
+conda --version
+conda clean --all
+conda env create -f environment.yml
