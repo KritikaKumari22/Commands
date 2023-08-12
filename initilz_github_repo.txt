@@ -1,0 +1,10 @@
+git init
+echo "# g" >> README.md
+git add README.md
+git config user.email "kriti.kritikakumari22@gmail.com"
+git config user.name "Kritika Kumari"
+git commit -m "12-08-23"
+git branch -M main
+git remote add origin https://github.com/KritikaKumari22/Graph_Solutions.git
+git push -u origin main
+
