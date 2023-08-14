@@ -1,10 +1,20 @@
 git init
-echo "# g" >> README.md
+echo "# Submision Scripts For Different Types of Clusters" >> README.md
 git add README.md
-git config user.email "kriti.kritikakumari22@gmail.com"
+git config user.email "kritika.kumari@students.iiserpune.ac.in"
 git config user.name "Kritika Kumari"
 git commit -m "12-08-23"
 git branch -M main
-git remote add origin https://github.com/KritikaKumari22/Graph_Solutions.git
-git push -u origin main
+git remote add origin https://github.com/KritikaKumari22/Submission_files_Cluster.git
+git push -u origin  main
 
+
+
+
+git clone https://github.com/KritikaKumari22/Submission_files_Cluster.git
+git checkout main
+git merge Side
+git add .
+git commit -m "Merge Side branch into main"
+git pull --rebase origin main
+git merge --allow-unrelated-histories side

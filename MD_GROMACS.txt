@@ -1,0 +1,89 @@
+ssh madhu@192.168.1.230
+madhu@@123
+
+cd /scratch/<your_directory>
+
+GROMACS CPU version(not recommended as not compatible with running the runs on GPUS) load: -
+
+module load intel/2020.4
+module load quantum_espresso_6.4.1
+
+GROMACS GPU version load: -
+
+module swap gnu8 cdac/compiler/gcc/10.2.0
+module load intel/2020.4
+module load iiser/apps/intel_2020/GROMACS/2021.3
+
+GROMACS MD COMMANDS:-
+(note- use gmx_mpi instead of gmx when GROMACS GPU version is loaded)
+
+gmx_mpi pdb2gmx -f pre.pdb -o processed.gro 
+
+gmx_mpi editconf -f processed.gro -o 1ema_newbox.gro -bt octahedron -d 1.0
+
+gmx_mpi solvate -cp 1ema_newbox.gro -cs spc216.gro -o 1ema_solv.gro -p topol.top
+
+gmx_mpi grompp -f ions.mdp -c 1ema_solv.gro -p topol.top -o ions.tpr
+
+gmx_mpi genion -s ions.tpr -o 1ema_ion.gro -p topol.top -pname NA -nname CL -neutral
+
+gmx_mpi grompp -f minim.mdp -c 1ema_ion.gro -p topol.top -o em.tpr
+
+gmx_mpi grompp -f nvt.mdp -c em.gro -r em.gro -p topol.top -o nvt.tpr
+
+gmx_mpi grompp -f md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
+
+(Command in CPU sbatch .sh file) gmx_mpi mdrun -v -deffnm em (name of .tpr file)
+
+ANALYSIS: -
+
+
+1.Trajectory Centering:    gmx_mpi trjconv -s md_0_1.tpr -f traj_comp.xtc -o traj_nojump_wat.xtc -pbc mol -center -dt 100 -n ana2.ndx        or    gmx_mpi_d trjconv -f md_0_1.xtc -o traj_nojump.xtc -pbc nojump -center
+
+2.                                     gmx_mpi check -f traj_nojump_wat.xtc 
+
+3. ENSEMBLE movie every 0.1ns (100ps)
+
+                                      gmx_mpi_d trjconv -f traj.trr -o ensemble_mov1.pdb -dt 100
+
+#######
+Make Index File: -
+
+gmx_mpi make_ndx -f step3_input.gro -n <index filename>.ndx
+######
+
+4.PDB ENSEMBLE         
+ 
+
+gmx_mpi trjconv -s md_0_1.tpr -f traj_nojump_wat.xtc -o ensemble.pdb -dt 100 -n <index filename>.ndx
+
+
+
+To check no. of models:  grep "MODEL" precyc_ensemble1.pdb
+
+D-RMSDs:-
+cog=center of gravioty
+com=center of mass
+Atom/residue pairs
+gmx distance -f traj_nojump_wat.xtc -s md_0_1.tpr -n ana.ndx  -oav distave96NH2.xvg -select 'cog of group "a_999" plus cog of group "a_1486"'
+
+RMSD PER NANOSEC:  gmx rms -s md_0_1.tpr -f traj_nojump_wat.xtc  -o rmsd_96NH2.xvg -dt 100 -n ana.ndx 
+
+RMSD PER NANOSEC W.R.T Minimized STR :  gmx_mpi_d rms -s em.tpr -f traj_nojump.xtc  -o rmsd_allatm_refminim.xvg -dt 100 -n analysis.ndx
+
+
+Radius of Gyration       gmx gyrate -s md_0_1.tpr -f traj_nojump_wat.xtc  -o gyrate.xvg
+
+
+Root mean square fluctuations-
+                                       gmx rmsf -f traj_nojump_wat.xtc  -s md_0_1.tpr -o rmsf-per-residue.xvg -ox average.pdb -oq bfactors.pdb -res -n analysis.ndx -dt 100
+
+
+DISTANCE RMSD           gmx rmsdist -s md_0_1.tpr -f traj_nojump_wat.xtc -o distance-rmsd.xvg
+
+DISTANCE RMSD(atm pairs)  gmx  rmsdist -s md_0_1.tpr -f traj_nojump_wat.xtc -rms rmsd_64_96.xpm -mean rmsmean64_96.xpm -dt 100 *NOT HUMAN READABLE*
+
+HYDROGEN BONDS:-
+              
+gmx hbond -f traj_nojump_wat.xtc -s md_0_1.tpr -num hydrogen-bonds-64_96NH2.xvg -life life.xvg -n 1.ndx -dt 100
+
