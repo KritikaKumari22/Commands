@@ -1,3 +1,4 @@
+## Create Github Repo
 git init
 echo "# Submision Scripts For Different Types of Clusters" >> README.md
 git add README.md
@@ -8,10 +9,15 @@ git branch -M main
 git remote add origin https://github.com/KritikaKumari22/Submission_files_Cluster.git
 git push -u origin  main
 
-
-
+## Clone The whole Repo and then Update it
 
 git clone https://github.com/KritikaKumari22/Submission_files_Cluster.git
+git pull origin main
+git add .
+git commit -m "14-08-23"
+git push origin main
+
+## Merge Two Branches when updating to different branches
 git checkout main
 git merge Side
 git add .
