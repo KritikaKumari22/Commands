@@ -24,3 +24,9 @@ git add .
 git commit -m "Merge Side branch into main"
 git pull --rebase origin main
 git merge --allow-unrelated-histories side
+
+
+##To update local directory -
+git fetch origin
+git branch
+git merge origin/main 
